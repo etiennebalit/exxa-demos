@@ -5,7 +5,7 @@ from tqdm import tqdm
 from selenium import webdriver
 from selenium.webdriver.chrome.webdriver import WebDriver
 
-from scraperenv import URL, DriverLocation, output_file, nb_scroll
+from scraperenv import URL, DriverLocation, output_file, nb_scroll, hide_browser
 
 def setup():
     print("setup...")
@@ -50,7 +50,8 @@ def get_data():
 if __name__ == "__main__":
 
     options = webdriver.ChromeOptions()
-    # options.add_argument("--headless")  # show browser or not
+    if hide_browser:
+        options.add_argument("--headless")  # show browser or not
     options.add_argument("--lang=en-US")
     options.add_experimental_option('prefs', {'intl.accept_languages': 'en,en_US'})
     driver = webdriver.Chrome(DriverLocation, options=options)
