@@ -33,8 +33,6 @@ def get_data():
         'jftiEf')
     parsed_data = []
     for data in elements:
-        name = data.find_element_by_class_name("d4r55").text
-
         comment_div = data.find_element_by_class_name("MyEned")
         try:
             comment_div.find_element_by_xpath("//button[contains(., 'Plus')]").click()
@@ -45,7 +43,7 @@ def get_data():
 
         score = data.find_element_by_class_name("kvMYJc").get_attribute("aria-label")
         
-        parsed_data.append(f'{{"name": "{name}", "comment": "{comment}", "score": {score[0]}}}\n')
+        parsed_data.append(f'{{"comment": "{comment}", "score": {score[0]}}}\n')
 
     return parsed_data
 
