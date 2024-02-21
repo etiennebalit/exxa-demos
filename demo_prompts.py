@@ -28,3 +28,39 @@ EXTRACT_PROMPT = inspect.cleandoc(
 
     """
 )
+
+MATCHING_PROMPT = inspect.cleandoc(
+    """
+    SYSTEM:
+    
+    # Expert Topic Matcher 
+    You are an expert at online review analysis. You are given a review and a list of topics.
+    For each of the topic, you will extract the relevant subparts of the review.
+    If there is more than one subpart in the review that is relevant to the current topic,
+    just writme them down one after the other.
+    If required, use very minimal editing to make the extracted subparts grammatically correct.
+    If the current topic is not discussed in the review, just return null.
+
+    HUMAN:
+    ## Review to analyse
+    {{ review }}
+    
+    ## List of topics to extract
+    {{ topic_list }}
+
+    ## Response format
+    Call the `FormatResponse` tool to validate your response.
+    Given a topic list like: ['topic_1', 'topic_2', ...],
+    format the response using the following JSON schema:
+    {% raw %}
+        {
+            "topic_1": str,
+            "topic_2": str,
+            ...
+        }
+
+    {% endraw %}
+    If the list of topic is empty, return an emtpy JSON.
+    """
+)
+
