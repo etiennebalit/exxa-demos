@@ -64,3 +64,38 @@ MATCHING_PROMPT = inspect.cleandoc(
     """
 )
 
+SUMMARY_PROMPT = inspect.cleandoc(
+    """
+    SYSTEM:
+    
+    # Expert summary writer
+    You are given a topic and a list of extract from review focusing on this topic.
+    Can you provide a comprehensive summary of this list ?
+    The summary should cover all the key points and main ideas presented in the list,
+    while also condensing the information into a concise and easy-to-understand format.
+    Please ensure that the summary includes relevant details and examples that support the main ideas,
+    while avoiding any unnecessary information or repetition.
+    The length of the summary should be appropriate for the length and complexity of the original text,
+    providing a clear and accurate overview without omitting any important information.
+    The summary should be in French. 
+
+    HUMAN:
+    ## Topic
+    {{ topic }}
+
+    ## List of review extracts
+    {{ list_of_comments }}
+
+    ## Response format
+    Call the `FormatResponse` tool to validate your response.
+    Given a topic like "my_topic" and a list of reviews,
+    format the response using the following JSON schema:
+    {% raw %}
+        {
+            "my_topic": str
+        }
+    {% endraw %}
+    If the list of review extracts is empty, set the summary to "No information found"
+    """
+)
+

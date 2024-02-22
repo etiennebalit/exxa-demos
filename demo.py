@@ -5,7 +5,7 @@ from openai import AsyncOpenAI
 from jinja2 import Environment
 import json
 
-from demo_prompts import EXTRACT_PROMPT, MATCHING_PROMPT 
+from demo_prompts import EXTRACT_PROMPT, MATCHING_PROMPT, SUMMARY_PROMPT 
 
 
 client = AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY'])
@@ -30,13 +30,14 @@ async def main():
     gpt3 = "gpt-3.5-turbo"
     gpt4 = "gpt-4-turbo-preview"
 
-    nb_of_rows = 10
+    nb_of_rows = 50
     data_file = "output_kfc.jsonl"
     frame = pd.read_json(path_or_buf=data_file, lines=True)
 
     demande = input("Que voulez vous connaître dans cet établissement ?\n>>> ")
+    print()
 
-    topic_json = await model_completion({"data": demande}, EXTRACT_PROMPT, gpt3)
+    topic_json = await model_completion({"data": demande}, EXTRACT_PROMPT, gpt4)
     topic_dict = json.loads(topic_json)
     
     print("Lancement de la recherche sémantique sur les sujets:")
@@ -50,15 +51,40 @@ async def main():
             "topic_list": topic_dict.get("entities")
         })
 
-    tasks = []
+    extraction_tasks = []
     async with asyncio.TaskGroup() as tg:
         for topic_matching_kwargs in kwargs_list:
-            tasks.append(tg.create_task(model_completion(topic_matching_kwargs, MATCHING_PROMPT, gpt3)))
+            extraction_tasks.append(tg.create_task(model_completion(topic_matching_kwargs, MATCHING_PROMPT, gpt3)))
 
-    results = list(map(lambda x: json.loads(x.result()), tasks))
-    for result in results:
-        print(result)
-    
+    extraction_results = list(map(lambda x: json.loads(x.result()), extraction_tasks))
+
+
+    grouping_dict = {}
+    for topic in topic_dict.get("entities"):
+        grouping_dict[topic] = []
+
+    for result in extraction_results:
+        for topic in topic_dict.get("entities"):
+            if result.get(topic) is not None:
+                grouping_dict.get(topic).append(result.get(topic))
+
+    summary_tasks = []
+    async with asyncio.TaskGroup() as tg:
+        for topic, comments in grouping_dict.items():
+            summary_kwargs = {
+                "topic": topic,
+                "list_of_comments": comments
+            }
+            summary_tasks.append(tg.create_task(model_completion(summary_kwargs, SUMMARY_PROMPT, gpt3)))
+
+    summary_results = list(map(lambda x: json.loads(x.result()), summary_tasks))
+
+    print("\n\nResultats:")
+    for index, summarized_topic_dict in enumerate(summary_results):
+        topic = next(iter(summarized_topic_dict))
+        summary = summarized_topic_dict[topic]
+        print(f"{index + 1}. {topic}:\n{summary}\n\n")
+        
 
 asyncio.run(main())
 
