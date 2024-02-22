@@ -4,6 +4,7 @@ import os
 from openai import AsyncOpenAI
 from jinja2 import Environment
 import json
+import time
 
 from demo_prompts import EXTRACT_PROMPT, MATCHING_PROMPT, SUMMARY_PROMPT 
 
@@ -30,12 +31,16 @@ async def main():
     gpt3 = "gpt-3.5-turbo"
     gpt4 = "gpt-4-turbo-preview"
 
+    show_time = False
+
     nb_of_rows = 50
     data_file = "output_kfc.jsonl"
     frame = pd.read_json(path_or_buf=data_file, lines=True)
 
     demande = input("Que voulez vous connaître dans cet établissement ?\n>>> ")
     print()
+    
+    start_time = time.time()
 
     topic_json = await model_completion({"data": demande}, EXTRACT_PROMPT, gpt4)
     topic_dict = json.loads(topic_json)
@@ -84,7 +89,11 @@ async def main():
         topic = next(iter(summarized_topic_dict))
         summary = summarized_topic_dict[topic]
         print(f"{index + 1}. {topic}:\n{summary}\n\n")
-        
+
+    stop_time = time.time()
+    
+    if show_time:
+        print(f"Total llm pipeline processing time: {stop_time - start_time:.1f}s") 
 
 asyncio.run(main())
 
