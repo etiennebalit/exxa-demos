@@ -6,3 +6,6 @@ pandas
 asyncio
 jinja2
 instructor
+tenacity
+fastapi
+uvicorn[standard]
