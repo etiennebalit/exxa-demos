@@ -12,6 +12,7 @@ EXTRACTOR_PROMPT = [
         "content": inspect.cleandoc(
             """
             # Expert Entity Extractor
+            Your output should be in French.
             You are an expert entity extractor focusing on business relevant concept.
             You use inference or deduction whenever necessary to
             supply missing or omitted data. Examine the provided data, text, or
@@ -58,6 +59,7 @@ MATCHING_PROMPT = [
         "content": inspect.cleandoc(
             """
             # Expert Topic Matcher 
+            Your output should be in French.
             You are an expert at online review analysis. You are given a review and a list of topics.
             For each of the topic, you will extract the relevant subparts of the review.
             If there is more than one subpart in the review that is relevant to the current topic, just write them down one after the other.
@@ -94,6 +96,7 @@ SUMMARY_PROMPT = [
         "content": inspect.cleandoc(
             """
             # Expert summary writer
+            Your output should be in French.
             You are given a topic and a list positive, negative and neutral extract from review focusing on this topic.
             Make a summary of the comment for each sentiment.
             while also condensing the information into a concise and easy-to-understand format.
@@ -101,7 +104,6 @@ SUMMARY_PROMPT = [
             while avoiding any unnecessary information or repetition.
             The length of the summary should be appropriate for the length and complexity of the original text,
             providing a clear and accurate overview without omitting any important information.
-            The summary should be in French.
             If one of the list of comment for one sentiment is empty, summerise it as "No information found"
             """
         )

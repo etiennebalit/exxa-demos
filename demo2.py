@@ -8,6 +8,8 @@ import time
 import sys
 import instructor
 from copy import deepcopy
+from tenacity import retry, wait_exponential
+
 
 from demo2_prompts import EXTRACTOR_PROMPT, EXTRACTOR_OUTPUT, MATCHING_PROMPT, MATCHING_OUTPUT, SUMMARY_PROMPT, SUMMARY_OUTPUT, SentimentEnum
 
@@ -29,6 +31,7 @@ def format_prompts(prompt, kwargs_list):
     return list(map(lambda kwargs: format_prompt(deepcopy(prompt), kwargs), kwargs_list))
 
 
+@retry(wait=wait_exponential(multiplier=1, min=1, max=5))
 async def model_completion(prompt, response_model, temperature=0, model="gpt-3.5-turbo"):
     response = await client.chat.completions.create(
         messages = prompt,
@@ -55,7 +58,10 @@ async def main():
     data_file = "output_kfc.jsonl"
     frame = pd.read_json(path_or_buf=data_file, lines=True)
 
-    topic_request_str = "la propreté, le comportement du personnel et la qualité de la nourriture"
+    topic_request_str = input("Donnez les sujets que vous voulez examiner\n>>> ")
+    #topic_request_str = "la propreté, le comportement du personnel et la qualité de la nourriture"
+
+    start_time = time.time()
 
     prompt = format_prompt(EXTRACTOR_PROMPT, {"data": topic_request_str})
     topics = await model_completion(prompt, EXTRACTOR_OUTPUT, model=gpt3)
@@ -72,6 +78,8 @@ async def main():
     prompts  = format_prompts(MATCHING_PROMPT, review_topics_list)
     matching_results = await parallel_model_completion(prompts, MATCHING_OUTPUT, model=gpt3)
 
+
+    # group the comment by topic then by sentiment
     sentiment_dict = {sentiment.name: [] for sentiment in SentimentEnum}
     extracted_topics_dict = {topic: deepcopy(sentiment_dict) for topic in topics.topics}
     for result in matching_results:
@@ -88,8 +96,12 @@ async def main():
     prompts = format_prompts(SUMMARY_PROMPT, grouped_review_list)
     summary_results = await parallel_model_completion(prompts, SUMMARY_OUTPUT, temperature=0.7, model=gpt3)
     
+    stop_time = time.time()
+
     for element in summary_results :
         print(element, end="\n\n")
+
+    print(f"Total processing time: {stop_time - start_time}")
 
 asyncio.run(main())
 
