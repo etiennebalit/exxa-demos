@@ -74,11 +74,12 @@ async def extract_resume(request: ResumeRequest):
     gpt3 = "gpt-3.5-turbo"
     gpt4 = "gpt-4-turbo-preview"
 
-    nb_of_rows = 5
+    nb_of_rows = 50
     data_file = "data/output_kfc.jsonl"
     frame = pd.read_json(path_or_buf=data_file, lines=True)
 
     start_time = time.time()
+    print(request.demande)
 
     prompt = format_prompt(Extractor.EXTRACTOR_PROMPT, {"data": request.demande})
     topics = await model_completion(prompt, Extractor.EXTRACTOR_OUTPUT, model=gpt3)
