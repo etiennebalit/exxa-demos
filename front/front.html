@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<title>Summary Extraction</title>
+</head>
+<body>
+
+<div class="container">
+
+<div class="inputbox">
+    <h1>Summary Extraction</h1>
+    <label for="textInput">Enter your subject of interests:</label>
+    <input type="text" id="textInput" name="textInput">
+    <button type="button" onclick="sendRequest()">Extract Summary</button>
+</div>
+
+<div id="result" class="result"></div>
+  
+</div>
+
+<script>
+async function sendRequest() {
+    var inputText = document.getElementById('textInput').value;
+    const response = await fetch('http://localhost:8002/extract_resume', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ demande: inputText }),
+    });
+    const results = await response.json();
+    displayResults(results);
+}
+
+function displayResults(results) {
+    var resultDiv = document.getElementById('result');
+    var summary = results.results;
+    var html = '<h2>Résumé:</h2><ul>';
+    for (var category in summary) {
+      html += '<li><h3>' + category + ':</h3>';
+        var sentiments = summary[category];
+        html += "<ul>"
+        for (var sentiment in sentiments) {
+          html += '<li><p><strong>' + sentiment + ':</strong> ' + sentiments[sentiment] + '</p></li>';
+        }
+      html += '</ul></li>'
+    }
+    resultDiv.innerHTML = html;
+}
+
+
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,24 @@
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.container {
+    display: flex;
+    height: 100vh; /* 100% viewport height */
+}
+
+.inputbox {
+    flex: 1; /* Takes up one-third of the available space */
+    padding: 20px;
+    flex-direction: column;
+    background-color: lightblue;
+}
+
+.result {
+    flex: 2; /* Takes up two-thirds of the available space */
+    padding: 20px;
+    flex-direction: column;
+    background-color: lightgreen;
+}
