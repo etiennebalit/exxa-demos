@@ -31,6 +31,7 @@ client = instructor.patch(AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY']))
 
 def format_prompt(prompt, kwargs):
     formatter = Environment()
+    prompt = deepcopy(prompt)
     for turn in prompt:
         if turn.get("content") is None:
             raise ValueError("Your prompt content in None")
@@ -41,7 +42,7 @@ def format_prompt(prompt, kwargs):
 
 
 def format_prompts(prompt, kwargs_list):
-    return list(map(lambda kwargs: format_prompt(deepcopy(prompt), kwargs), kwargs_list))
+    return list(map(lambda kwargs: format_prompt(prompt, kwargs), kwargs_list))
 
 
 @retry(wait=wait_exponential(multiplier=1, min=1, max=5))
@@ -79,7 +80,6 @@ async def extract_resume(request: ResumeRequest):
     frame = pd.read_json(path_or_buf=data_file, lines=True)
 
     start_time = time.time()
-    print(request.demande)
 
     prompt = format_prompt(Extractor.EXTRACTOR_PROMPT, {"data": request.demande})
     topics = await model_completion(prompt, Extractor.EXTRACTOR_OUTPUT, model=gpt3)
