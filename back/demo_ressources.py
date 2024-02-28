@@ -7,6 +7,9 @@ from typing import List, Dict, Optional
 
 class Extractor:
 
+    class EXTRACTOR_INPUT(BaseModel):
+        data: str
+
     class EXTRACTOR_OUTPUT(BaseModel):
         topics: List[str]
 
@@ -44,6 +47,10 @@ class Extractor:
     ]
 
 class Matcher:
+
+    class MATCHING_INPUT(BaseModel):
+        review: str
+        topics_list: List[str]
 
     class SentimentEnum(str, Enum):
         positif = "positif"
@@ -92,6 +99,11 @@ class Matcher:
 
 
 class Summarizer:
+
+    class SUMMARY_INPUT(BaseModel):
+        topic: str
+        sentiment: str
+        bullet_points: List[str]
 
     class SUMMARY_OUTPUT(BaseModel):
         topic: str

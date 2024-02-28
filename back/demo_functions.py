@@ -6,14 +6,14 @@ from tenacity import retry, wait_exponential
 from jinja2 import Environment
 from copy import deepcopy
 
-def format_prompt(prompt: str, kwargs: Dict[str, str]) -> str:
+def format_prompt(prompt: str, data_model: BaseModel) -> str:
     formatter = Environment()
     prompt = deepcopy(prompt)
     for turn in prompt:
         if turn.get("content") is None:
             raise ValueError("Your prompt content in None")
 
-        turn["content"] = formatter.from_string(turn["content"]).render(**kwargs)
+        turn["content"] = formatter.from_string(turn["content"]).render(**dict(data_model))
 
     return prompt
 
