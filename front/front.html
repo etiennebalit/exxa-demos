@@ -28,7 +28,7 @@
 <script>
 async function sendRequest() {
     var inputText = document.getElementById('textInput').value;
-    const response = await fetch('http://localhost:8003/extract_topics', {
+    const response = await fetch('http://localhost:8000/extract_topics', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -42,7 +42,7 @@ async function sendRequest() {
 }
 
 async function sendTopics(topics) {
-  const response = await fetch('http://localhost:8003/match_topics', {
+  const response = await fetch('http://localhost:8000/match_topics', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'
