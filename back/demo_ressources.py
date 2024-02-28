@@ -55,7 +55,7 @@ class Matcher:
     class SentimentEnum(str, Enum):
         positif = "positif"
         negatif = "negatif"
-        neutre  = "neutre"
+        # neutre  = "neutre"
 
     class ExtractionSentiment(BaseModel):
         topic: str = Field(..., description="The topic of interest")
@@ -92,6 +92,8 @@ class Matcher:
 
                 ## Response format
                 You must output a JSON.
+                Use the provided sentiment as the key to the output JSON.
+                The sentiment shall be either positif or negatif. 
                 """
             )
         }
@@ -111,6 +113,7 @@ class Summarizer:
         bullet_points: List[str]
 
     SUMMARY_PROMPT = [
+
         {
             "role": "system",
             "content": inspect.cleandoc(
@@ -121,7 +124,9 @@ class Summarizer:
                 from differents review. Your goal is to output a list of bullet point.
                 Some of the bullet points, even if phrased differently, will have the same meaning.
                 Those bullet points shall be summarized as one single bullet point.
+                Each bullet point must end with a '.'.
                 If the list of bullet point is empty, write "No information found"
+
                 """
             )
         },
@@ -149,13 +154,16 @@ class InputOutput:
 
     class ResumeRequest(BaseModel):
         demande: str
+
+    class OutputSentiment(BaseModel):
+        positif: List[str] = []
+        # neutre: List[str] = []
+        negatif: List[str] = []
     
     class OutputTopic(BaseModel):
         topic: str
-        positif: List[str] = []
-        neutre: List[str] = []
-        negatif: List[str] = []
+        sentiments: 'InputOutput.OutputSentiment'
 
     class Output(BaseModel):
-        result: List['InputOutput.OutputTopic']
+        results: List['InputOutput.OutputTopic'] = []
 

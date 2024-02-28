@@ -27,7 +27,6 @@ app.add_middleware(
 
 client = instructor.patch(AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY']))
 
-
 @app.post("/extract_resume/")
 async def extract_resume(request: InputOutput.ResumeRequest) :
     gpt3 = "gpt-3.5-turbo"
@@ -51,7 +50,6 @@ async def extract_resume(request: InputOutput.ResumeRequest) :
     prompts = format_prompts(Matcher.MATCHING_PROMPT, review_topics_list)
     matching_results = await parallel_model_completion(client, prompts, Matcher.MATCHING_OUTPUT, model=gpt3)
 
-
     sentiment_topic_list: List[Summarizer.SUMMARY_INPUT] = []
     for sentiment in Matcher.SentimentEnum:
         for topic in topics.topics:
@@ -71,17 +69,14 @@ async def extract_resume(request: InputOutput.ResumeRequest) :
     summary_results = await parallel_model_completion(client, prompts, Summarizer.SUMMARY_OUTPUT, temperature=0.7, model=gpt3)
                 
     
-    output: InputOutput.Output = dict()
-    output["results"] = []
+    output: InputOutput.Output = InputOutput.Output()
     for topic in topics.topics:
-        formated_topic = InputOutput.OutputTopic(topic=topic)
+        formated_topic = InputOutput.OutputTopic(topic=topic, sentiments=InputOutput.OutputSentiment())
         for result in summary_results:
             if topic == result.topic:
-                sentiment_field = getattr(formated_topic, result.sentiment)
+                sentiment_field = getattr(formated_topic.sentiments, result.sentiment)
                 sentiment_field += result.bullet_points
 
-        output["results"].append(formated_topic)
-
-    print(output)
+        output.results.append(formated_topic)
 
     return JSONResponse(content=jsonable_encoder(output))
