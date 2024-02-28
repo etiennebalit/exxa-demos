@@ -4,6 +4,7 @@ from pydantic import BaseModel, RootModel, Field
 from typing import List, Dict, Optional
 
 
+
 class Extractor:
 
     class EXTRACTOR_OUTPUT(BaseModel):
@@ -45,9 +46,9 @@ class Extractor:
 class Matcher:
 
     class SentimentEnum(str, Enum):
-        positive = "positive"
-        negative = "negative"
-        neutral  = "neutral"
+        positif = "positif"
+        negatif = "negatif"
+        neutre  = "neutre"
 
     class ExtractionSentiment(BaseModel):
         topic: str = Field(..., description="The topic of interest")
@@ -63,10 +64,10 @@ class Matcher:
             "role": "system",
             "content": inspect.cleandoc(
                 """
-                # Expert Topic Matcher 
+                # Expert Bullet Points extractor 
                 Your output should be in French.
                 You are an expert at online review analysis. You are given a review and a list of topics.
-                For each of the topic, you will extract the relevant subparts of the review.
+                For each of the topic, you will extract the relevant subparts of the review as bullet points.
                 If there is more than one subpart in the review that is relevant to the current topic, just write them down one after the other.
                 If required, use very minimal editing to make the extracted subparts grammatically correct.
                 """
@@ -94,9 +95,8 @@ class Summarizer:
 
     class SUMMARY_OUTPUT(BaseModel):
         topic: str
-        positive_summary: str
-        neutral_summary: str
-        negative_summary: str
+        sentiment: str
+        bullet_points: List[str]
 
     SUMMARY_PROMPT = [
         {
@@ -105,14 +105,11 @@ class Summarizer:
                 """
                 # Expert summary writer
                 Your output should be in French.
-                You are given a topic and a list positive, negative and neutral extract from review focusing on this topic.
-                Make a summary of the comment for each sentiment.
-                while also condensing the information into a concise and easy-to-understand format.
-                Please ensure that the summary includes relevant details and examples that support the main ideas,
-                while avoiding any unnecessary information or repetition.
-                The length of the summary should be appropriate for the length and complexity of the original text,
-                providing a clear and accurate overview without omitting any important information.
-                If one of the list of comment for one sentiment is empty, summerise it as "No information found"
+                You are given a topic, a sentiment and a list of bullet points. Those bullet points comes
+                from differents review. Your goal is to output a list of bullet point.
+                Some of the bullet points, even if phrased differently, will have the same meaning.
+                Those bullet points shall be summarized as one single bullet point.
+                If the list of bullet point is empty, write "No information found"
                 """
             )
         },
@@ -123,8 +120,11 @@ class Summarizer:
                 ## Topic
                 {{ topic }}
 
+                ## Sentiment
+                {{ sentiment }}
+
                 ## List of review extracts
-                {{ list_of_comments }}
+                {{ bullet_points }}
 
                 ## Response format
                 You must output a JSON.
@@ -133,5 +133,17 @@ class Summarizer:
         }
     ]
 
-class ResumeRequest(BaseModel):
-    demande: str
+class InputOutput:
+
+    class ResumeRequest(BaseModel):
+        demande: str
+    
+    class OutputTopic(BaseModel):
+        topic: str
+        positif: List[str] = []
+        neutre: List[str] = []
+        negatif: List[str] = []
+
+    class Output(BaseModel):
+        result: List['InputOutput.OutputTopic']
+
