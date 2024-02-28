@@ -27,17 +27,26 @@ app.add_middleware(
 
 client = instructor.patch(AsyncOpenAI(api_key=os.environ['OPENAI_API_KEY']))
 
-@app.post("/extract_resume/")
-async def extract_resume(request: InputOutput.ResumeRequest) :
-    gpt3 = "gpt-3.5-turbo"
-    gpt4 = "gpt-4-turbo-preview"
+gpt3 = "gpt-3.5-turbo"
+gpt4 = "gpt-4-turbo-preview"
 
-    nb_of_rows = 10
-    data_file = "data/kfc.jsonl"
-    frame = pd.read_json(path_or_buf=data_file, lines=True)
+@app.post("/extract_topics")
+async def extract_resume(request: InputOutput.ResumeRequest) :
+
+
+
 
     prompt = format_prompt(Extractor.EXTRACTOR_PROMPT, Extractor.EXTRACTOR_INPUT(data=request.demande))
     topics = await model_completion(client, prompt, Extractor.EXTRACTOR_OUTPUT, model=gpt3)
+
+    return JSONResponse(content=jsonable_encoder(topics))
+
+
+@app.post("/match_topics")
+async def match_topics(topics: Extractor.EXTRACTOR_OUTPUT):
+    nb_of_rows = 10
+    data_file = "data/kfc.jsonl"
+    frame = pd.read_json(path_or_buf=data_file, lines=True)
 
     # Format the review list
     review_topics_list: List[Matcher.MATCHING_INPUT] = []
@@ -66,7 +75,7 @@ async def extract_resume(request: InputOutput.ResumeRequest) :
             )
 
     prompts = format_prompts(Summarizer.SUMMARY_PROMPT, sentiment_topic_list)
-    summary_results = await parallel_model_completion(client, prompts, Summarizer.SUMMARY_OUTPUT, temperature=0.7, model=gpt3)
+    summary_results = await parallel_model_completion(client, prompts, Summarizer.SUMMARY_OUTPUT, temperature=0.1, model=gpt3)
                 
     
     output: InputOutput.Output = InputOutput.Output()

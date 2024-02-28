@@ -16,9 +16,10 @@ body, html {
     background-color: lightblue;
 }
 
-.result {
+.output {
     flex: 2; /* Takes up two-thirds of the available space */
     padding: 20px;
     flex-direction: column;
     background-color: lightgreen;
+    overflow: auto;
 }

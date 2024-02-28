@@ -17,14 +17,18 @@
     <button type="button" onclick="sendRequest()">Extract Summary</button>
 </div>
 
-<div id="result" class="result"></div>
+<div id="output" class="output">
+  <div id="topics" class="topics"></div>
+  <div id="result" class="result"></div>
+</div>
+
   
 </div>
 
 <script>
 async function sendRequest() {
     var inputText = document.getElementById('textInput').value;
-    const response = await fetch('http://localhost:8002/extract_resume', {
+    const response = await fetch('http://localhost:8003/extract_topics', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -32,25 +36,54 @@ async function sendRequest() {
         body: JSON.stringify({ demande: inputText }),
     });
     const results = await response.json();
-    displayResults(results);
+    console.log(results);
+    displayTopics(results);
+    sendTopics(results);
 }
 
-function displayResults(results) {
+async function sendTopics(topics) {
+  const response = await fetch('http://localhost:8003/match_topics', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(topics),
+  });
+  const results = await response.json();
+  console.log(results);
+  displayFinalResults(results);
+}
+
+function displayTopics(topics) {
+  var topicDiv = document.getElementById('topics');
+  topics_list = topics.topics;
+  var html = '<h2>Sujets extraits:</h2><ul>';
+  for (topic of topics_list) {
+    html += '<li>' + topic + "</li>"
+  }
+  html += '</ul>';
+  topicDiv.innerHTML = html;
+}
+
+function displayFinalResults(results) {
     var resultDiv = document.getElementById('result');
     var summary = results.results;
     var html = '<h2>Résumé:</h2><ul>';
-    for (var category in summary) {
-      html += '<li><h3>' + category + ':</h3>';
-        var sentiments = summary[category];
-        html += "<ul>"
-        for (var sentiment in sentiments) {
-          html += '<li><p><strong>' + sentiment + ':</strong> ' + sentiments[sentiment] + '</p></li>';
+    for (var index in summary) {
+      html += '<ol><h3>' + summary[index].topic + ':</h3>';
+      var sentiments = summary[index]["sentiments"];
+      html += "<ul>"
+      for (var sentiment in sentiments) {
+        html += '<li><p><strong>' + sentiment + ':</strong>';
+        for (var bullet_index in sentiments[sentiment]) {
+          html += '<ul>' + sentiments[sentiment][bullet_index] + "</ul><br>"
         }
-      html += '</ul></li>'
+        html += '</p></li>'
+      }
+      html += '</ul></ol>'
     }
     resultDiv.innerHTML = html;
 }
-
 
 </script>
 
