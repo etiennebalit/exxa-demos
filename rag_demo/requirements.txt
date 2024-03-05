@@ -1,0 +1,4 @@
+ragatouille
+openai
+instructor
+chainlit
